@@ -1,4 +1,3 @@
 vendor/
 bin/
-srbuilder.phar
 composer.lock
