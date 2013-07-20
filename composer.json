@@ -1,0 +1,14 @@
+{
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/console": "v2.3.2",
+        "symfony/yaml": "v2.3.2",
+        "syringe/dependency-injection": "1.2.2",
+        "syringe/configuration-builder": "1.0.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "Syringe": "src"
+        }
+    }
+}
