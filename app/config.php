@@ -34,19 +34,9 @@ return array(
         'tag_collector' => array(
             'class' => 'Syringe\Component\Builder\ServiceCollector\TagCollector',
         ),
-        'config_parser' => array(
-            'class' => 'Syringe\Component\Parser\DelegatedParser',
-            'arguments' => array('#parser'),
-        ),
-        'php_parser' => array(
-            'class' => 'Syringe\Component\Parser\PhpParser',
-        ),
-        'yaml_parser' => array(
-            'class' => 'Syringe\Component\Parser\Sf2YamlParser',
-        ),
         'build_command' => array(
             'class' => 'Syringe\Command\BuildCommand',
-            'arguments' => ['@builder', '@config_parser'],
+            'arguments' => ['@builder'],
         ),
     ),
     'tags' => array(
@@ -58,10 +48,6 @@ return array(
             'service_collector',
             'alias_collector',
             'tag_collector',
-        ),
-        'parser' => array(
-            'php_parser',
-            'yaml_parser',
         ),
     ),
 );

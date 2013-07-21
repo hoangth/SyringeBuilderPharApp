@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Syringe\Component\Builder\Builder;
 use Syringe\Component\Builder\ServiceVisitor\InvalidConfigurationException;
+use Syringe\Component\Adapter\IAdapter;
 use Syringe\Component\Parser\IParser;
 
 class BuildCommand extends Command
@@ -19,20 +20,13 @@ class BuildCommand extends Command
     protected $builder;
 
     /**
-     * @var IParser
-     */
-    protected $parser;
-
-    /**
      * @param Builder $builder
-     * @param IParser $parser
      */
-    public function __construct(Builder $builder, IParser $parser)
+    public function __construct(Builder $builder)
     {
         parent::__construct();
 
         $this->builder = $builder;
-        $this->parser  = $parser;
     }
 
     protected function configure()
@@ -40,17 +34,17 @@ class BuildCommand extends Command
         $this
             ->setName('syringe:build')
             ->setDescription('Build configuration')
-            ->addArgument('configlist', InputArgument::REQUIRED, 'Php file which returns a list of configuration files')
+            ->addArgument('adapter', InputArgument::REQUIRED, 'Php file which returns a list of configuration files')
             ->addArgument('outputfile', InputArgument::REQUIRED, 'Result configuration file')
             ->setHelp(<<<EOT
-<info>php srbuilder.phar configlist.php ioc_configuration.php</info>
+<info>php srbuilder.phar adapter.php ioc_configuration.php</info>
 <comment>
-Example a configlist.php:</comment>
+Example a adapter.php:</comment>
 <info><?php
-return array(
+return new SimpleAdapter(array(
     'app/config/config.php',
-    'config-local.yaml',
-);
+    'config-local.yml',
+));
 </info>
 EOT
             );
@@ -58,29 +52,22 @@ EOT
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $configListFile  = $input->getArgument('configlist');
+        $adapterPath     = $input->getArgument('adapter');
         $ouputConfigFile = $input->getArgument('outputfile');;
 
-        if (!is_readable($configListFile)) {
-            throw new \InvalidArgumentException(sprintf("Config list file '%s' is not readable", $configListFile));
+        if (!is_readable($adapterPath)) {
+            throw new \InvalidArgumentException(sprintf("Config list file '%s' is not readable", $adapterPath));
         }
 
         if (!$this->isWritable($ouputConfigFile)) {
             throw new \InvalidArgumentException(sprintf("Output configuration file '%s' is not writable", $ouputConfigFile));
         }
 
-        $configList = require $configListFile;
+        /** @var IAdapter $adapter */
+        $adapter = require $adapterPath;
 
-        if (empty($configList)) {
-            throw new \InvalidArgumentException("Config list file is empty");
-        }
-
-        foreach ($configList as $configFile) {
-            if (!is_readable($configFile)) {
-                continue;
-            }
-
-            $this->builder->addConfiguration($this->parser->parse($configFile));
+        foreach ($adapter->getConfigurationsList() as $configuration) {
+            $this->builder->addConfiguration($configuration);
         }
 
         try {
