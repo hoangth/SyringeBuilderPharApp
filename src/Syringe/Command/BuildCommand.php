@@ -73,9 +73,9 @@ EOT
         try {
             $this->builder->build();
         } catch (InvalidConfigurationException $e) {
-            $output->writeln(sprintf("<error>%s</error>"), $e->getMessage());
+            $output->writeln(sprintf("<error>%s</error>", $e->getMessage()));
             foreach ($e->getErrors() as $error) {
-                $output->writeln(sprintf("<error>%s</error>"), $error->getMessage());
+                $output->writeln(sprintf("<error>%s</error>", $error->getMessage()));
             }
             exit(1);
         }
